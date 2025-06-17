@@ -62,6 +62,7 @@ class Map:
         self._random_seed = seed
         random.seed(seed)
         self._rooms = {}
+        self._walls = {}
         self._room_types = {"hallway":{"exits":(2,2),"encounters":False},"chamber":{"exits":(1,4),"encounters":True}} #unused
 
     def get_room(self,location:tuple[int,int]) -> Room:
@@ -72,9 +73,17 @@ class Map:
     def is_wall(self,source:tuple[int,int],destination:tuple[int,int]) -> bool:
         rooms = [source,destination]
         rooms.sort()
+
+        # check cache for prior set up
+        if str(self._random_seed)+str(rooms) in self._walls:
+            return self._walls[str(self._random_seed)+str(rooms)]
+        
         random.seed(str(self._random_seed)+str(rooms))
         isWall = True if random.random()<0.5 else False
+
+        self._walls[str(self._random_seed)+str(rooms)] = isWall
         random.seed(self._random_seed)
+
         return isWall
             
         
@@ -97,11 +106,14 @@ class Player:
     
         
 class Monster:
-    def __init__(self, name:str) -> None:
+    def __init__(self, name:str, health_base:int, atk_base:int, def_base:int) -> None:
         self._name = name
+        self._health_base = health_base
+        self._atk_base = atk_base
+        self._def_base = def_base
+        self._statuses = []
+        self._inventory = Inventory()
 
-class Door:
-    pass
 
 class Weapon(Item):
     pass
